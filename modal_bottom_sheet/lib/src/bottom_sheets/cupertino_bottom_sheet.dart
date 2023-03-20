@@ -166,6 +166,7 @@ class CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
     Clip? clipBehavior,
     AnimationController? secondAnimationController,
     Curve? animationCurve,
+    Curve? reverseAnimationCurve,
     Color? modalBarrierColor,
     bool bounce = true,
     bool isDismissible = true,
@@ -193,6 +194,7 @@ class CupertinoModalBottomSheetRoute<T> extends ModalBottomSheetRoute<T> {
           expanded: expanded,
           settings: settings,
           animationCurve: animationCurve,
+          reverseAnimationCurve: reverseAnimationCurve,
           duration: duration,
         );
 
@@ -239,6 +241,7 @@ class _CupertinoModalTransition extends StatelessWidget {
   final Animation<double> secondaryAnimation;
   final Radius topRadius;
   final Curve? animationCurve;
+  final Curve? reverseAnimationCurve;
   final Color backgroundColor;
   final SystemUiOverlayStyle? overlayStyle;
 
@@ -251,6 +254,7 @@ class _CupertinoModalTransition extends StatelessWidget {
     required this.topRadius,
     this.backgroundColor = Colors.black,
     this.animationCurve,
+    this.reverseAnimationCurve,
     this.overlayStyle,
   }) : super(key: key);
 
@@ -264,9 +268,9 @@ class _CupertinoModalTransition extends StatelessWidget {
     }
 
     final curvedAnimation = CurvedAnimation(
-      parent: secondaryAnimation,
-      curve: animationCurve ?? Curves.easeOut,
-    );
+        parent: secondaryAnimation,
+        curve: animationCurve ?? Curves.easeOut,
+        reverseCurve: reverseAnimationCurve);
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle ?? SystemUiOverlayStyle.light,
@@ -412,14 +416,18 @@ class CupertinoScaffold extends StatefulWidget {
   final Radius topRadius;
   final Color transitionBackgroundColor;
   final SystemUiOverlayStyle? overlayStyle;
+  final Curve animationCurve;
+  final Curve reverseAnimationCurve;
 
-  const CupertinoScaffold({
-    Key? key,
-    required this.body,
-    this.topRadius = _kDefaultTopRadius,
-    this.transitionBackgroundColor = Colors.black,
-    this.overlayStyle,
-  }) : super(key: key);
+  const CupertinoScaffold(
+      {Key? key,
+      required this.body,
+      this.topRadius = _kDefaultTopRadius,
+      this.transitionBackgroundColor = Colors.black,
+      this.overlayStyle,
+      required this.animationCurve,
+      required this.reverseAnimationCurve})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _CupertinoScaffoldState();
@@ -429,6 +437,7 @@ class CupertinoScaffold extends StatefulWidget {
     double? closeProgressThreshold,
     required WidgetBuilder builder,
     Curve? animationCurve,
+    Curve? reverseAnimationCurve,
     Curve? previousRouteAnimationCurve,
     Color? backgroundColor,
     Color? barrierColor,
@@ -470,6 +479,7 @@ class CupertinoScaffold extends StatefulWidget {
       enableDrag: enableDrag,
       topRadius: topRadius ?? _kDefaultTopRadius,
       animationCurve: animationCurve,
+      reverseAnimationCurve: reverseAnimationCurve,
       previousRouteAnimationCurve: previousRouteAnimationCurve,
       duration: duration,
       settings: settings,
@@ -506,6 +516,8 @@ class _CupertinoScaffoldState extends State<CupertinoScaffold>
         topRadius: widget.topRadius,
         backgroundColor: widget.transitionBackgroundColor,
         overlayStyle: widget.overlayStyle,
+        animationCurve: widget.animationCurve,
+        reverseAnimationCurve: widget.reverseAnimationCurve,
       ),
     );
   }

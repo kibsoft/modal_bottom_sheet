@@ -16,6 +16,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.expanded = false,
     this.enableDrag = true,
     this.animationCurve,
+    this.reverseAnimationCurve,
   }) : super(key: key);
 
   final double? closeProgressThreshold;
@@ -25,6 +26,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final bool enableDrag;
   final AnimationController? secondAnimationController;
   final Curve? animationCurve;
+  final Curve? reverseAnimationCurve;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -50,6 +52,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   }
 
   ScrollController? _scrollController;
+  var lastAnimationValue = 0.0;
 
   @override
   void initState() {
@@ -67,6 +70,13 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   void updateController() {
     final animation = widget.route.animation;
     if (animation != null) {
+      if (animation.value >= lastAnimationValue) {
+        widget.secondAnimationController?.forward();
+      } else {
+        widget.secondAnimationController?.reverse();
+      }
+      lastAnimationValue = animation.value;
+
       widget.secondAnimationController?.value = animation.value;
     }
   }
@@ -112,6 +122,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                 bounce: widget.bounce,
                 scrollController: scrollController,
                 animationCurve: widget.animationCurve,
+                reverseAnimationCurve: widget.reverseAnimationCurve,
               ),
             );
           },
@@ -136,6 +147,7 @@ class ModalBottomSheetRoute<T> extends PageRoute<T> {
     required this.expanded,
     this.bounce = false,
     this.animationCurve,
+    this.reverseAnimationCurve,
     Duration? duration,
     RouteSettings? settings,
   })  : duration = duration ?? _bottomSheetDuration,
@@ -155,6 +167,7 @@ class ModalBottomSheetRoute<T> extends PageRoute<T> {
 
   final AnimationController? secondAnimationController;
   final Curve? animationCurve;
+  final Curve? reverseAnimationCurve;
 
   @override
   Duration get transitionDuration => duration;
@@ -204,14 +217,14 @@ class ModalBottomSheetRoute<T> extends PageRoute<T> {
         bounce: bounce,
         enableDrag: enableDrag,
         animationCurve: animationCurve,
+        reverseAnimationCurve: reverseAnimationCurve,
       ),
     );
     return bottomSheet;
   }
 
   @override
-  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) =>
-      nextRoute is ModalBottomSheetRoute;
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => nextRoute is ModalBottomSheetRoute;
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) =>

@@ -36,6 +36,7 @@ class ModalBottomSheet extends StatefulWidget {
     Key? key,
     required this.animationController,
     this.animationCurve,
+    this.reverseAnimationCurve,
     this.enableDrag = true,
     this.containerBuilder,
     this.bounce = true,
@@ -66,6 +67,7 @@ class ModalBottomSheet extends StatefulWidget {
   ///
   /// If no curve is provided it falls back to `decelerateEasing`.
   final Curve? animationCurve;
+  final Curve? reverseAnimationCurve;
 
   /// Allows the bottom sheet to  go beyond the top bound of the content,
   /// but then bounce the content back to the edge of
@@ -372,10 +374,14 @@ class ModalBottomSheetState extends State<ModalBottomSheet>
       animation: widget.animationController,
       builder: (context, Widget? child) {
         assert(child != null);
-        final animationValue = animationCurve.transform(
-            mediaQuery.accessibleNavigation
-                ? 1.0
-                : widget.animationController.value);
+
+        final reverseCurve = widget.reverseAnimationCurve ?? animationCurve;
+        final curve = widget.animationController.status == AnimationStatus.reverse
+            ? reverseCurve
+            : animationCurve;
+
+        final animationValue = curve
+            .transform(mediaQuery.accessibleNavigation ? 1.0 : widget.animationController.value);
 
         final draggableChild = !widget.enableDrag
             ? child
